@@ -4,30 +4,61 @@ import './App.css';
 import PropTypes from 'prop-types';
 import Timeline from 'react-calendar-timeline/lib';
 import moment from 'moment';
+import generateFakeData from './generate-fake-data';
+
+var keys = {
+  groupIdKey: "id",
+  groupTitleKey: "title",
+  groupRightTitleKey: "rightTitle",
+  itemIdKey: "id",
+  itemTitleKey: "title",
+  itemDivTitleKey: "title",
+  itemGroupKey: "group",
+  itemTimeStartKey: "start",
+  itemTimeEndKey: "end"
+};
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    const { groups, items } = generateFakeData();
+
+    const newGroups = groups.map(group => {
+      const isRoot = (parseInt(group.id) - 1) % 3 === 0;
+      console.log("is root");
+      console.log(isRoot);
+
+      console.log("parent")
+      console.log(Math.floor((parseInt(group.id) - 1) / 3) * 3 + 1)
+      const parent = isRoot
+       ? null
+       : Math.floor((parseInt(group.id) - 1) / 3) * 3 + 1;
+
+      return Object.assign({}, group, {
+        root: isRoot,
+        parent: parent
+      });
+    });
+
+    this.state = {
+     groups: newGroups,
+     items: items
+   };
+  }
 
   render() {
-    const test = "abcdef";
-    const groups = [
-      {id: 1, title: 'group 1'},
-      {id: 2, title: 'group 2'}
-    ]
-
-    const items = [
-      {id: 1, group: 1, title: 'item 1', start_time: moment(), end_time: moment().add(1, 'hour')},
-      {id: 2, group: 2, title: 'item 2', start_time: moment().add(-0.5, 'hour'), end_time: moment().add(0.5, 'hour')},
-      {id: 3, group: 1, title: 'item 3', start_time: moment().add(2, 'hour'), end_time: moment().add(3, 'hour')}
-    ]
-
+    const { groups, items } = this.state;
+    console.log(groups);
     return (
       <div className="App">
-        <Timeline groups={groups}
+        <Timeline
+              groups={groups}
               items={items}
-              defaultTimeStart={moment().add(-12, 'hour')}
-              defaultTimeEnd={moment().add(12, 'hour')}
+              keys={keys}
+              defaultTimeStart={moment().add(-5, 'days')}
+              defaultTimeEnd={moment().add(5, 'days')}
               />
-        <span>{test}</span>
       </div>
     );
   }
